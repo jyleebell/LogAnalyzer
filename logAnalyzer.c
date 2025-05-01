@@ -1,3 +1,8 @@
+/*
+Log Analyzer 
+  Author: Soc Design Lab. Jbnu
+  Function: Analyze the log files from a battery gauge and find instruction patterns
+*/
 #include<stdio.h>
 #include<stdlib.h>
 #include<string.h>
