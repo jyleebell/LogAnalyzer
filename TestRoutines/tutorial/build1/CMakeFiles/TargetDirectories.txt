@@ -1,0 +1,5 @@
+/DATADRIVE1/Projects/BatteryGauge/LogAnayzer/TestRoutines/tutorial/build1/CMakeFiles/rebuild_cache.dir
+/DATADRIVE1/Projects/BatteryGauge/LogAnayzer/TestRoutines/tutorial/build1/CMakeFiles/igraph_tutorial1.dir
+/DATADRIVE1/Projects/BatteryGauge/LogAnayzer/TestRoutines/tutorial/build1/CMakeFiles/igraph_tutorial2.dir
+/DATADRIVE1/Projects/BatteryGauge/LogAnayzer/TestRoutines/tutorial/build1/CMakeFiles/igraph_tutorial3.dir
+/DATADRIVE1/Projects/BatteryGauge/LogAnayzer/TestRoutines/tutorial/build1/CMakeFiles/edit_cache.dir

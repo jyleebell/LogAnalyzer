@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/iso.dir/igraph_isomorphic_vf2.c.o -o iso  /DATADRIVE1/Projects/BatteryGauge/igraph/lib/libigraph.a -lm /usr/lib/x86_64-linux-gnu/libgmp.so /usr/lib/gcc/x86_64-linux-gnu/7/libgomp.so -lpthread 
