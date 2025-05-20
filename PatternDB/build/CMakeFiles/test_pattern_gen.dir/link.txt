@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/test_pattern_gen.dir/pattern_gen.c.o CMakeFiles/test_pattern_gen.dir/DATADRIVE1/Projects/BatteryGauge/LogAnayzer/util.c.o -o test_pattern_gen  /DATADRIVE1/Projects/BatteryGauge/igraph/lib/libigraph.a -lm /usr/lib/x86_64-linux-gnu/libgmp.so /usr/lib/gcc/x86_64-linux-gnu/7/libgomp.so -lpthread 
