@@ -17,5 +17,8 @@ add_executable(test_pattern_gen
   pattern_gen.c
   ../util.c
 )
+
+target_compile_definitions(test_pattern_gen PRIVATE UNIT_TEST_PATTERN_DB)
+
 target_link_libraries(test_pattern_gen PUBLIC igraph::igraph)
 

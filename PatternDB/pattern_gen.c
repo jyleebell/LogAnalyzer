@@ -22,7 +22,7 @@ print_pattern_list() {
 }
 
 void 
-pattern_gen(char *fname) {
+parse_pattern_file(char *fname) {
   FILE *fp;
   int readLineResult;
   char *p;
@@ -103,14 +103,15 @@ pattern_gen(char *fname) {
   }
 }
 
+#ifdef UNIT_TEST_PATTERN_DB
 int
 main() {
   FILE *inFp;
 
-  pattern_gen("pattern");
+  parse_pattern_file("pattern");
 
   print_pattern_list();
 
   return 0;
 }
-
+#endif

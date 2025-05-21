@@ -12,6 +12,7 @@ set(CMAKE_C_COMPILER_ID "GNU")
 # Preprocessor definitions for this target.
 set(CMAKE_TARGET_DEFINITIONS_C
   "IGRAPH_STATIC"
+  "UNIT_TEST_PATTERN_DB"
   )
 
 # The include file search paths:

@@ -23,4 +23,8 @@
 #define DBG2_PRINT(fmt, args...)
 #endif
 
+int readLine(FILE *fp, char *lineStr, size_t size);
+char * skipWhiteSpaces(char *lineStr);
+extern unsigned long lineNo;
+
 #endif /* util_h */
