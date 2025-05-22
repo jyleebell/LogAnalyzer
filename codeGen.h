@@ -170,4 +170,6 @@ extern unsigned long lineNo;
 #define GET_SRC0_OPERAND_TYPE(nodeP) nodeP->lineP->opP->src[0]->type
 #define IS_VISITED(nodeP) nodeP->lineP->isVisited
 
+#define GET_NODE_ID_FROM_LINENO(lineNo, offset) (lineNo - offset)
+
 #endif /* codeGen_h */
