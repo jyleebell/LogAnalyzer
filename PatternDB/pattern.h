@@ -3,6 +3,8 @@
 // Created by JBNU 
 //
 
+#include <igraph.h>
+
 typedef struct pattern_t {
   char fun[20];
   unsigned long start_pc;
@@ -17,8 +19,6 @@ typedef struct pattern_node_t {
   struct pattern_node_t *link;
 } PATTERN_NODE;
 
-extern PATTERN_NODE *pattern_head;
-extern PATTERN_NODE *pattern_tail;
 
 void parse_pattern_file(char *fname);
 void print_pattern_list();

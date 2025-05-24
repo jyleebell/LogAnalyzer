@@ -119,6 +119,10 @@ int isFirstInGroup = 0;
 FILE *resultFP;
 line_no_t startLine = 0, endLine = 0;
 
+extern PATTERN_NODE *pattern_head;
+extern PATTERN_NODE *pattern_tail;
+
+
 /*
  typedef struct operand_t {
    OPERAND_TYPE type;
@@ -616,7 +620,6 @@ findDepDListNodes(igraph_t *pGraph, OpDListNode *nodeP) {
 
 
 /*
-
  node1
  node0 : start here (= nodeP)
 
@@ -777,7 +780,15 @@ main(int argc, char *argv[]) {
   int rangeKind = RANGE_CLOCK;
   int interactiveMode = 0;
 
-  igraph_t graph;
+  int answer;
+  char ansStr[3];
+  char pattern_lgl_fname[30], pattern_dot_fname[30];
+  FILE *pattern_lgl_fp,*pattern_dot_fp;
+
+  PATTERN_NODE *pn;
+  OpDListNode *opDNode;
+
+  igraph_t pattern_graph, log_graph;
   igraph_vs_t vs;
   igraph_vit_t vit;
 
@@ -812,77 +823,28 @@ main(int argc, char *argv[]) {
   
   initOpDList();
 
-  if (!interactiveMode) {
-#if 0
-    /* this mode is not used and will be removed in the future */
-    resultFP = stdout;
-    rangeKind = strcmp(argv[1], "-c");
-    if (!strcmp(argv[1], "-c")) {
-      rangeKind = RANGE_CLOCK;
-    }
-    else if (!strcmp(argv[1], "-p")) {
-      rangeKind = RANGE_PC;
-    }
-    else if (!strcmp(argv[1], "-l")) {
-      rangeKind = RANGE_LINE_NO;
-    }
-    
-    if (rangeKind == RANGE_CLOCK) {
-      startClk = (clk_t) strtol(argv[2], NULL, 16);
-      endClk = (clk_t) strtol(argv[3], NULL, 16);
-      if (endClk < startClk) {
-        fprintf(stderr, "end clock is smaller than start clk\n");
-        exit(OPTION_ERROR);
-      }
-    } else if (rangeKind == RANGE_PC) {
-      startPC = (pc_t) strtol(argv[2], NULL, 16);
-      endPC = (pc_t) strtol(argv[3], NULL, 16);
-      DBG1_PRINT("startPC: %lx, endPC: %lx\n", startPC, endPC);
-      if (endPC < startPC) {
-        fprintf(stderr, "end PC is smaller than start PC\n");
-        exit(OPTION_ERROR);
-      }
-    } else if (rangeKind == RANGE_LINE_NO) {
-      startLine = (line_no_t) strtol(argv[2], NULL, 10);
-      endLine = (line_no_t) strtol(argv[3], NULL, 10);
-      if (endLine < startLine) {
-        fprintf(stderr, "end line number is smaller than start line number\n");
-        exit(OPTION_ERROR);
-      }
-    } else {
-      fprintf(stderr, "Error: option must be -c (for clock) or -p (for pc)\n");
-      exit(OPTION_ERROR);
-    }
-    fprintf(stderr, "Reading log file %s ...\n", argv[4]);
-    if ((fp = fopen(argv[4], "r")) == NULL) {
-      fprintf(stderr, "File open error\n");
-      return FILE_OPEN_ERR;
-    }
-#endif
-  } else {
-    printf("Interactive mode:\n");
-    printf(">>> Input log file name: ");
-    
-    scanf("%s", logFileName);
-    if ((fp = fopen(logFileName, "r")) == NULL) {
-      fprintf(stderr, "File open error\n");
-      return FILE_OPEN_ERR;
-    }
-
-	/*
-    printf(">>> Output file name (for monitor input stdout): ");
-    
-    scanf("%s", resultFileName);
-    if (!strcmp(resultFileName, "stdout"))
-      resultFP = stdout;
-    else if ((resultFP = fopen(resultFileName, "w")) == NULL) {
-      fprintf(stderr, "File open error\n");
-      return FILE_OPEN_ERR;
-    }
-	*/
-    
-    fprintf(stderr, "Reading log file %s ...\n", logFileName);
+  printf("Interactive mode:\n");
+  printf(">>> Input log file name: ");
+  
+  scanf("%s", logFileName);
+  if ((fp = fopen(logFileName, "r")) == NULL) {
+	fprintf(stderr, "File open error\n");
+	return FILE_OPEN_ERR;
   }
+
+  /*
+  printf(">>> Output file name (for monitor input stdout): ");
+  
+  scanf("%s", resultFileName);
+  if (!strcmp(resultFileName, "stdout"))
+	resultFP = stdout;
+  else if ((resultFP = fopen(resultFileName, "w")) == NULL) {
+	fprintf(stderr, "File open error\n");
+	return FILE_OPEN_ERR;
+  }
+  */
+  
+  fprintf(stderr, "Reading log file %s ...\n", logFileName);
 
   /*
    * Read log file and construct a double-linked list
@@ -993,344 +955,267 @@ main(int argc, char *argv[]) {
   */
 
   fprintf(stderr, "### Done reading log file...\n");
-  if (!interactiveMode) {
-#if 0
-    fprintf(stderr, "### Anaylyzing log file...\n");
-	noOfGraphNodes = 0;
-    if (rangeKind == RANGE_PC) findRange(rangeKind, startPC, endPC);
-    else if (rangeKind == RANGE_CLOCK) findRange(rangeKind, startClk, endClk);
-    else if (rangeKind == RANGE_LINE_NO) findRange(rangeKind, startLine, endLine);
+  
+  fprintf(stderr, "### Reading and pattern.in and generating PatternDB ...\n");
+  parse_pattern_file("pattern.in");
+  print_pattern_list();
+
+  for (pn = pattern_head; pn ; pn = pn->link) {
+	findRange(RANGE_PC, pn->pattern_data->start_pc, pn->pattern_data->end_pc);
+	pn->pattern_data->start_lineno = startLine;
+	pn->pattern_data->end_lineno = endLine;
+	noOfGraphNodes = endLine - startLine + 1;
 
 	/* Create a directed graph with no vertices or edges. */
-	igraph_empty(&graph, 0, IGRAPH_DIRECTED);
-
-	printf("noOfGraphNodes = %lu\n", noOfGraphNodes);
+	igraph_empty(&pattern_graph, 0, IGRAPH_DIRECTED);
 
 	/* Add noOfGraphNodes vertices. Vertex IDs will range from 0 to noOfGraphNodes-1, inclusive. */
-	printf("HERE 16: noOfGraphNodes = %lu\n", noOfGraphNodes);
-	igraph_add_vertices(&graph, noOfGraphNodes, NULL);
-    
-    DBG1_PRINT("sizeof(operandNameStrs) = %ld\n", sizeof(operandNameStrs));
-    DBG1_PRINT("sizeof(operandNameStrs)/sizeof(char *) = %ld\n", sizeof(operandNameStrs)/sizeof(char *));
+	printf("HERE 76: noOfGraphNodes = %lu\n", noOfGraphNodes);
+	igraph_add_vertices(&pattern_graph, noOfGraphNodes, NULL);
 
-	printf("HERE 17\n");
+	printf("HERE 77\n");
 	igraph_vs_all(&vs);
 
-	printf("HERE 18\n");
-	igraph_vit_create(&graph, vs, &vit);
+	printf("HERE 78\n");
+	/* creates a vertex iterator from a vertex selector */
+	igraph_vit_create(&pattern_graph, vs, &vit);
 
 	while (!IGRAPH_VIT_END(vit)) {
-	  // printf(" %" IGRAPH_PRId, IGRAPH_VIT_GET(vit));
-	  printf("HERE 19\n");
-	  SETVAN(&graph, "Line", IGRAPH_VIT_GET(vit), 0);
+	  /* initalize the attribute "Line" with 0 
+	   * When making graphs this attribute is set with the pointer to OpDListNode 
+	   * which contains all data of each log line in
+	   * findDepDlistNodes.
+	   */
+	  /*
+	   * IGRAPH_VIT_GET returns the vertex ID of the current vertex 
+	   * SETVAN(graph, name, vid, value): the attribute (name) of vertex vid is set with value
+	   */
+	  // SETVAN(&graph, "Line", IGRAPH_VIT_GET(vit), 0);
+	  SETVAN(&pattern_graph, "Visited", IGRAPH_VIT_GET(vit), 0);
 
-	  printf("HERE 20\n");
+	  /* get next vertex */
 	  IGRAPH_VIT_NEXT(vit);
 	}
 
-	printf(">>> Output file name (for monitor input stdout): ");
-	scanf("%s", resultFileName);
-	if (!strcmp(resultFileName, "stdout"))
-	  resultFP = stdout;
-	else if ((resultFP = fopen(resultFileName, "w")) == NULL) {
-	  fprintf(stderr, "File open error\n");
+	
+	DBG1_PRINT("sizeof(operandNameStrs) = %ld\n", sizeof(operandNameStrs));
+	DBG1_PRINT("sizeof(operandNameStrs)/sizeof(char *) = %ld\n", sizeof(operandNameStrs)/sizeof(char *));
+
+	resultFP = stdout;
+	nodeIDOffset = startLine;
+	fprintf(resultFP, "DB Gerating starts from : \n");
+	printDepNodesWithTabs(resultFP, endNode, 0);
+
+	opDNode = endNode;
+	while (opDNode != startNode) {
+	  printDepNodesWithTabs(resultFP, opDNode, 0);
+	  findDepDListNodesReverse(&pattern_graph, opDNode);
+	  opDNode = opDNode->left;
+	}
+
+	SETVAN(
+	  &pattern_graph, 
+	  "Line",
+	  GET_NODE_ID_FROM_LINENO(GET_LINE_NO(startNode), nodeIDOffset), 
+	  (unsigned long) GET_LINE(startNode)
+	);
+
+	igraph_simplify(&pattern_graph, true, true, /*edge_comb=*/ NULL);
+
+	/*
+	 * Output files
+	 */
+	sprintf(pattern_lgl_fname, "%s.lgl", pn->pattern_data->fun);
+	sprintf(pattern_dot_fname, "%s.dot", pn->pattern_data->fun);
+	pattern_lgl_fp = fopen(pattern_lgl_fname, "w");
+	if (pattern_lgl_fp == NULL) {
+	  fprintf(stderr, "Pattern LGL file open error\n");
+	  return FILE_OPEN_ERR;
+	}
+	pattern_dot_fp = fopen(pattern_dot_fname, "w");
+	if (pattern_dot_fp == NULL) {
+	  fprintf(stderr, "Pattern DOT file open error\n");
 	  return FILE_OPEN_ERR;
 	}
 
-	{
-	  char dotFileName[LOG_FILENAME_SIZE+5];
-	  sprintf(dotFileName, "%s.dot", resultFileName);
-	  if ((fpDot = fopen(dotFileName, "w")) == NULL) {
-		fprintf(stderr, "Dot file open error\n");
-		return FILE_OPEN_ERR;
-	  }
+	igraph_write_graph_dot(&pattern_graph, pattern_dot_fp);
+	igraph_write_graph_lgl(&pattern_graph, pattern_lgl_fp, NULL, NULL, /*isolates*/ 0);
+
+	fprintf(resultFP, "\n#########################\n");
+	fprintf(resultFP, "\tfun: %s\n", pn->pattern_data->fun);
+	fprintf(resultFP, "\tstart_pc: %lx\n", pn->pattern_data->start_pc);
+	fprintf(resultFP, "\tend_pc: %lx\n", pn->pattern_data->end_pc);
+
+	fclose(pattern_dot_fp);
+	fclose(pattern_lgl_fp);
+	igraph_destroy(&pattern_graph);
+  }
+  fprintf(stderr, "### Done generating PatternDB ...\n");
+
+  while (1) {
+	/* while user wants to continue analysis */
+	getchar();
+	printf("Input range type \"p\" for pc, \"l\" for line numer or \"e\" to exit: ");
+	fgets(ansStr, 2, stdin);
+	answer = ansStr[0];
+
+	if (answer != 'p' && answer != 'l' && answer != 'e') {
+	  printf("Answer must be p, l or e\n");
+	  continue;
 	}
+	else if (answer == 'e') {
+	  printf("### Good-bye\n");
+	  break;
+	}
+	else {
+	  char startValue[10], endValue[10];
+	  printf("Input start value (decimal for line number and hexadecimal for PC) : ");
+	  scanf("%s", startValue);
+	  
+	  printf("Input end value (decimal for line number and hexadecimal for PC) : ");
+	  scanf("%s", endValue);
+	  
+	  if (answer == 'l') {
+		startLine = (line_no_t) strtol(startValue, NULL, 10);
+		endLine = (line_no_t) strtol(endValue, NULL, 10);
+		rangeKind = RANGE_LINE_NO;
+	  } else if (answer == 'p') {
+		startPC = (pc_t) strtol(startValue, NULL, 16);
+		endPC = (pc_t) strtol(endValue, NULL, 16);
+		rangeKind = RANGE_PC;
+	  }
+	  
+	  noOfGraphNodes = 0;
+	  /*
+	   find two nodes in the doble-linked list corresponding to startLine (or startPC) and endLine(or endPC)
+	   Variables startNode and endNode are set.
+	   */
+	  if (rangeKind == RANGE_PC) {
+		findRange(rangeKind, startPC, endPC);
+	  } else if (rangeKind == RANGE_LINE_NO) {
+		findRange(rangeKind, startLine, endLine);
+	  }
 
-    printf("Starting from : \n");
-    // printDepNodes(resultFP, startNode, 0);
-    printDepNodesWithTabs(resultFP, startNode, 0);
-	SETVAN(&graph, "Line", GET_LINE_NO(startNode), (unsigned long) GET_LINE(startNode));
-    grpTail = grpHead = (GrpHeadNode *) malloc(sizeof(GrpHeadNode));
-    findDepDListNodes(&graph, startNode);
-    grpHead->lineNo = GET_LINE_NO(endNode);
-	if (resultFP != stdout)
-	  fclose(resultFP);
-	igraph_simplify(&graph, true, true, /*edge_comb=*/ NULL);
-	igraph_write_graph_dot(&graph, fpDot);
-	igraph_destroy(&graph);
-	printf("### Good-bye\n");
-#endif
-  } else {
-	/* 
-	 * Interactive mode
-	 */
-    int answer;
-    char ansStr[3];
-	char lgl_fname[30], dot_fname[30];
-	FILE *lgl_fp,*dot_fp;
-	PATTERN_NODE *pn;
-	OpDListNode *op;
-
-	fprintf(stderr, "### Reading and pattern.in and generating PatternDB ...\n");
-	parse_pattern_file("pattern.in");
-	print_pattern_list();
-
-	for (pn = pattern_head; pn ; pn = pn->link) {
-	  findRange(RANGE_PC, pn->pattern_data->start_pc, pn->pattern_data->end_pc);
-	  pn->pattern_data->start_lineno = startLine;
-	  pn->pattern_data->end_lineno = endLine;
 	  noOfGraphNodes = endLine - startLine + 1;
+	  nodeIDOffset = startLine;
 
 	  /* Create a directed graph with no vertices or edges. */
-	  igraph_empty(&graph, 0, IGRAPH_DIRECTED);
+	  igraph_empty(&log_graph, 0, IGRAPH_DIRECTED);
 
 	  /* Add noOfGraphNodes vertices. Vertex IDs will range from 0 to noOfGraphNodes-1, inclusive. */
-	  printf("HERE 76: noOfGraphNodes = %lu\n", noOfGraphNodes);
-	  igraph_add_vertices(&graph, noOfGraphNodes, NULL);
+	  printf("HERE 6: noOfGraphNodes = %lu\n", noOfGraphNodes);
+	  igraph_add_vertices(&log_graph, noOfGraphNodes, NULL);
 
-	  printf("HERE 77\n");
+	  printf("HERE 7\n");
 	  igraph_vs_all(&vs);
 
-	  printf("HERE 78\n");
+	  printf("HERE 8\n");
 	  /* creates a vertex iterator from a vertex selector */
-	  igraph_vit_create(&graph, vs, &vit);
+	  igraph_vit_create(&log_graph, vs, &vit);
 
 	  while (!IGRAPH_VIT_END(vit)) {
 		/* initalize the attribute "Line" with 0 
-		 * When making graphs this attribute is set with the pointer to OpDListNode 
-		 * which contains all data of each log line in
-		 * findDepDlistNodes.
+		 * When making graphs this attribute is set with the pointer to OpDListNode which contains all data 
+		 * of each log line in findDepDlistNodes.
 		 */
 		/*
 		 * IGRAPH_VIT_GET returns the vertex ID of the current vertex 
 		 * SETVAN(graph, name, vid, value): the attribute (name) of vertex vid is set with value
 		 */
 		// SETVAN(&graph, "Line", IGRAPH_VIT_GET(vit), 0);
-		SETVAN(&graph, "Visited", IGRAPH_VIT_GET(vit), 0);
+		SETVAN(&log_graph, "Visited", IGRAPH_VIT_GET(vit), 0);
 
 		/* get next vertex */
 		IGRAPH_VIT_NEXT(vit);
 	  }
 
-	  /*
-	   * Output files
-	   */
-	  sprintf(lgl_fname, "%s.lgl", pn->pattern_data->fun);
-	  sprintf(dot_fname, "%s.dot", pn->pattern_data->fun);
-	  lgl_fp = fopen(lgl_fname, "w");
-	  if (lgl_fp == NULL) {
-		fprintf(stderr, "Pattern LGL file open error\n");
-		return FILE_OPEN_ERR;
-	  }
-	  dot_fp = fopen(dot_fname, "w");
-	  if (dot_fp == NULL) {
-		fprintf(stderr, "Pattern DOT file open error\n");
+	  printf(">>> Output file name (for monitor input stdout): ");
+	  scanf("%s", resultFileName);
+	  if (!strcmp(resultFileName, "stdout"))
+		resultFP = stdout;
+	  else if ((resultFP = fopen(resultFileName, "w")) == NULL) {
+		fprintf(stderr, "File open error\n");
 		return FILE_OPEN_ERR;
 	  }
 
+			  
 	  DBG1_PRINT("sizeof(operandNameStrs) = %ld\n", sizeof(operandNameStrs));
 	  DBG1_PRINT("sizeof(operandNameStrs)/sizeof(char *) = %ld\n", sizeof(operandNameStrs)/sizeof(char *));
 
-	  resultFP = stdout;
-	  nodeIDOffset = startLine;
-	  fprintf(resultFP, "DB Gerating starts from : \n");
+	  fprintf(resultFP, "Starting from : \n");
 	  printDepNodesWithTabs(resultFP, endNode, 0);
 
-	  op = endNode;
-	  while (op != startNode) {
-		printDepNodesWithTabs(resultFP, op, 0);
-		findDepDListNodesReverse(&graph, op);
-		op = op->left;
+	  opDNode = endNode;
+	  while (opDNode != startNode) {
+		printDepNodesWithTabs(resultFP, opDNode, 0);
+		findDepDListNodesReverse(&log_graph, opDNode);
+		opDNode = opDNode->left;
 	  }
 
 	  SETVAN(
-		&graph, 
+		&log_graph, 
 		"Line",
 		GET_NODE_ID_FROM_LINENO(GET_LINE_NO(startNode), nodeIDOffset), 
 		(unsigned long) GET_LINE(startNode)
 	  );
 
-	  igraph_simplify(&graph, true, true, /*edge_comb=*/ NULL);
-	  igraph_write_graph_dot(&graph, dot_fp);
-	  igraph_write_graph_lgl(&graph, lgl_fp, NULL, NULL, /*isolates*/ 0);
-	  igraph_destroy(&graph);
-
-	  fprintf(resultFP, "\n#########################\n");
-	  fprintf(resultFP, "\tfun: %s\n", pn->pattern_data->fun);
-	  fprintf(resultFP, "\tstart_pc: %lx\n", pn->pattern_data->start_pc);
-	  fprintf(resultFP, "\tend_pc: %lx\n", pn->pattern_data->end_pc);
-
-	  fclose(dot_fp);
-	  fclose(lgl_fp);
-	}
-
-    while (1) {
-	  /* while user wants to continue analysis */
-      getchar();
-      printf("Input range type \"p\" for pc, \"l\" for line numer or \"e\" to exit: ");
-      fgets(ansStr, 2, stdin);
-      answer = ansStr[0];
-
-      if (answer != 'p' && answer != 'l' && answer != 'e') {
-        printf("Answer must be p, l or e\n");
-        continue;
-      }
-      else if (answer == 'e') {
-        printf("### Good-bye\n");
-        break;
-      }
-      else {
-        char startValue[10], endValue[10];
-        printf("Input start value (decimal for line number and hexadecimal for PC) : ");
-        scanf("%s", startValue);
-        
-        printf("Input end value (decimal for line number and hexadecimal for PC) : ");
-        scanf("%s", endValue);
-        
-        if (answer == 'l') {
-          startLine = (line_no_t) strtol(startValue, NULL, 10);
-          endLine = (line_no_t) strtol(endValue, NULL, 10);
-          rangeKind = RANGE_LINE_NO;
-        } else if (answer == 'p') {
-          startPC = (pc_t) strtol(startValue, NULL, 16);
-          endPC = (pc_t) strtol(endValue, NULL, 16);
-          rangeKind = RANGE_PC;
-        }
-        
-		noOfGraphNodes = 0;
-		/*
-		 find two nodes in the doble-linked list corresponding to startLine (or startPC) and endLine(or endPC)
-		 Variables startNode and endNode are set.
-		 */
-        if (rangeKind == RANGE_PC) {
-		  findRange(rangeKind, startPC, endPC);
-		} else if (rangeKind == RANGE_LINE_NO) {
-		  findRange(rangeKind, startLine, endLine);
+	  {
+		/* open a dot file */
+		char dotFileName[LOG_FILENAME_SIZE+5];
+		char lglFileName[LOG_FILENAME_SIZE+5];
+		if (resultFP != stdout) {
+		  sprintf(dotFileName, "%s.dot", resultFileName);
+		  sprintf(lglFileName, "%s.lgl", resultFileName);
+		} else {
+		  sprintf(dotFileName, "outgraph.dot");
+		  sprintf(lglFileName, "outgraph.lgl");
 		}
 
-		noOfGraphNodes = endLine - startLine + 1;
-		nodeIDOffset = startLine;
-
-		/* Create a directed graph with no vertices or edges. */
-		igraph_empty(&graph, 0, IGRAPH_DIRECTED);
-
-		/* Add noOfGraphNodes vertices. Vertex IDs will range from 0 to noOfGraphNodes-1, inclusive. */
-		printf("HERE 6: noOfGraphNodes = %lu\n", noOfGraphNodes);
-		igraph_add_vertices(&graph, noOfGraphNodes, NULL);
-
-		printf("HERE 7\n");
-		igraph_vs_all(&vs);
-
-		printf("HERE 8\n");
-		/* creates a vertex iterator from a vertex selector */
-		igraph_vit_create(&graph, vs, &vit);
-
-		while (!IGRAPH_VIT_END(vit)) {
-		  /* initalize the attribute "Line" with 0 
-		   * When making graphs this attribute is set with the pointer to OpDListNode which contains all data 
-		   * of each log line in findDepDlistNodes.
-		   */
-		  /*
-		   * IGRAPH_VIT_GET returns the vertex ID of the current vertex 
-		   * SETVAN(graph, name, vid, value): the attribute (name) of vertex vid is set with value
-		   */
-		  // SETVAN(&graph, "Line", IGRAPH_VIT_GET(vit), 0);
-		  SETVAN(&graph, "Visited", IGRAPH_VIT_GET(vit), 0);
-
-		  /* get next vertex */
-		  IGRAPH_VIT_NEXT(vit);
-		}
-
-		printf(">>> Output file name (for monitor input stdout): ");
-		scanf("%s", resultFileName);
-		if (!strcmp(resultFileName, "stdout"))
-		  resultFP = stdout;
-		else if ((resultFP = fopen(resultFileName, "w")) == NULL) {
-		  fprintf(stderr, "File open error\n");
+		if ((fpDot = fopen(dotFileName, "w")) == NULL) {
+		  fprintf(stderr, "Dot file open error\n");
 		  return FILE_OPEN_ERR;
 		}
 
-		        
-        DBG1_PRINT("sizeof(operandNameStrs) = %ld\n", sizeof(operandNameStrs));
-        DBG1_PRINT("sizeof(operandNameStrs)/sizeof(char *) = %ld\n", sizeof(operandNameStrs)/sizeof(char *));
-
-        fprintf(resultFP, "Starting from : \n");
-        printDepNodesWithTabs(resultFP, startNode, 0);
-
-		op = endNode;
-		while (op != startNode) {
-		  printDepNodesWithTabs(resultFP, op, 0);
-		  findDepDListNodesReverse(&graph, op);
-		  op = op->left;
+		if ((fpLgl = fopen(lglFileName, "w")) == NULL) {
+		  fprintf(stderr, "LGL file open error\n");
+		  return FILE_OPEN_ERR;
 		}
-
-		SETVAN(
-		  &graph, 
-		  "Line",
-		  GET_NODE_ID_FROM_LINENO(GET_LINE_NO(startNode), nodeIDOffset), 
-		  (unsigned long) GET_LINE(startNode)
-		);
-
-		
-
-		{
-		  /* open a dot file */
-		  char dotFileName[LOG_FILENAME_SIZE+5];
-		  char lglFileName[LOG_FILENAME_SIZE+5];
-		  if (resultFP != stdout) {
-			sprintf(dotFileName, "%s.dot", resultFileName);
-			sprintf(lglFileName, "%s.lgl", resultFileName);
-		  } else {
-			sprintf(dotFileName, "outgraph.dot");
-			sprintf(lglFileName, "outgraph.lgl");
-		  }
-
-		  if ((fpDot = fopen(dotFileName, "w")) == NULL) {
-			fprintf(stderr, "Dot file open error\n");
-			return FILE_OPEN_ERR;
-		  }
-
-		  if ((fpLgl = fopen(lglFileName, "w")) == NULL) {
-			fprintf(stderr, "LGL file open error\n");
-			return FILE_OPEN_ERR;
-		  }
-		}
+	  }
 
 
-		if (resultFP != stdout) fclose(resultFP);
-		igraph_simplify(&graph, true, true, /*edge_comb=*/ NULL);
+	  if (resultFP != stdout) fclose(resultFP);
+	  igraph_simplify(&log_graph, true, true, /*edge_comb=*/ NULL);
 
-		{
-		  igraph_bool_t res;
+	  {
+		igraph_bool_t res;
 
-		  igraph_is_simple(&graph, &res);
-		  printf("Is graph simple: %d\n", res);
+		igraph_is_simple(&log_graph, &res);
+		printf("Is graph simple: %d\n", res);
 
-		  igraph_has_loop(&graph, &res);
-		  printf("has loop: %d\n", res);
+		igraph_has_loop(&log_graph, &res);
+		printf("has loop: %d\n", res);
 
-		  igraph_has_multiple(&graph, &res);
-		  printf("has multiple: %d\n", res);
+		igraph_has_multiple(&log_graph, &res);
+		printf("has multiple: %d\n", res);
 
-		}
+	  }
 
-		igraph_write_graph_lgl(&graph, fpLgl, NULL, NULL, /*isolates*/ 1);
-		igraph_write_graph_dot(&graph, fpDot);
-		igraph_destroy(&graph);
-      }
+	  igraph_write_graph_lgl(&log_graph, fpLgl, NULL, NULL, /*isolates*/ 1);
+	  igraph_write_graph_dot(&log_graph, fpDot);
+	  igraph_destroy(&log_graph);
+	}
 
 #if 0
-	  {
-		// for test
-		LogLine *lineP;
-		unsigned long temp;
+	{
+	  // for test
+	  LogLine *lineP;
+	  unsigned long temp;
 
-		temp = (unsigned long) VAN(&graph, "Line", 981);
+	  temp = (unsigned long) VAN(&graph, "Line", 981);
 
-		lineP = (LogLine *) temp;
-		printLogLine(stdout, lineP, 1);
-	  }
+	  lineP = (LogLine *) temp;
+	  printLogLine(stdout, lineP, 1);
+	}
 #endif
-    }
   }
 }
