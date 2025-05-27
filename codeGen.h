@@ -153,7 +153,6 @@ typedef struct logLine {
   char opName[OPNAME_SIZE];		// mov, alu
   char strLine[MAX_LINE_LEN];	// string for each line
   OPERATION *opP;
-  char isVisited;
 } LogLine;
 
 extern char *operatorNameStrs[];

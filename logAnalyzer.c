@@ -17,6 +17,7 @@ Log Analyzer
 #include "print.h"
 #include "opList.h"
 #include "pattern.h"
+#include "iso.h"
 
 
 char *operandNameStrs[] = {
@@ -765,6 +766,40 @@ findRange(int rangeKind, unsigned long start, unsigned long end) {
   }
 }
 
+
+
+#if 0
+void delete_isolated_vertices(igraph_t *pg) {
+  igraph_vs_t vs2;
+  igraph_vit_t vit2;
+
+  /* delete isolated verices */
+  igraph_vs_all(&vs2);
+
+  /* creates a vertex iterator from a vertex selector */
+  igraph_vit_create(pg, vs2, &vit2);
+
+  while (!IGRAPH_VIT_END(vit2)) {
+	igraph_integer_t deg;
+	igraph_integer_t vid;
+
+	vid = IGRAPH_VIT_GET(vit2);
+	IGRAPH_CHECK(igraph_degree_1(pg, &deg, vid, IGRAPH_ALL, IGRAPH_LOOPS));
+
+	if (deg == 0) {
+	  igraph_delete_vertices(pg, igraph_vss_1(vid));
+	}
+
+	/* get next vertex */
+	IGRAPH_VIT_NEXT(vit2);
+  }
+
+  igraph_vs_destroy(&vs2);
+  igraph_vit_destroy(&vit2);
+}
+#endif
+
+
 #define IS_PRINT_OPND_ONLY 0
 int
 main(int argc, char *argv[]) {
@@ -789,8 +824,11 @@ main(int argc, char *argv[]) {
   OpDListNode *opDNode;
 
   igraph_t pattern_graph, log_graph;
-  igraph_vs_t vs;
-  igraph_vit_t vit;
+  igraph_vs_t vs, vs2;
+  igraph_vit_t vit, vit2;
+
+  igraph_graph_list_t complist, log_complist, pattern_complist;
+  igraph_integer_t i, j;
 
   /* Turn on attribute handling. */
   igraph_set_attribute_table(&igraph_cattribute_table);
@@ -936,7 +974,6 @@ main(int argc, char *argv[]) {
 	lineP->fieldB = fieldB;
 	strncpy(lineP->opName, opName, OPNAME_SIZE-2);
 	lineP->opP = operationP;
-    lineP->isVisited = 0;
 	// printLogLine(lineP, 0);
 	insertLast(lineP);
 
@@ -967,18 +1004,18 @@ main(int argc, char *argv[]) {
 	noOfGraphNodes = endLine - startLine + 1;
 
 	/* Create a directed graph with no vertices or edges. */
-	igraph_empty(&pattern_graph, 0, IGRAPH_DIRECTED);
+	igraph_empty(&(pn->pattern_data->pg), 0, IGRAPH_DIRECTED);
 
 	/* Add noOfGraphNodes vertices. Vertex IDs will range from 0 to noOfGraphNodes-1, inclusive. */
 	printf("HERE 76: noOfGraphNodes = %lu\n", noOfGraphNodes);
-	igraph_add_vertices(&pattern_graph, noOfGraphNodes, NULL);
+	igraph_add_vertices(&(pn->pattern_data->pg), noOfGraphNodes, NULL);
 
 	printf("HERE 77\n");
 	igraph_vs_all(&vs);
 
 	printf("HERE 78\n");
 	/* creates a vertex iterator from a vertex selector */
-	igraph_vit_create(&pattern_graph, vs, &vit);
+	igraph_vit_create(&(pn->pattern_data->pg), vs, &vit);
 
 	while (!IGRAPH_VIT_END(vit)) {
 	  /* initalize the attribute "Line" with 0 
@@ -991,7 +1028,7 @@ main(int argc, char *argv[]) {
 	   * SETVAN(graph, name, vid, value): the attribute (name) of vertex vid is set with value
 	   */
 	  // SETVAN(&graph, "Line", IGRAPH_VIT_GET(vit), 0);
-	  SETVAN(&pattern_graph, "Visited", IGRAPH_VIT_GET(vit), 0);
+	  SETVAN(&(pn->pattern_data->pg), "Visited", IGRAPH_VIT_GET(vit), 0);
 
 	  /* get next vertex */
 	  IGRAPH_VIT_NEXT(vit);
@@ -1004,23 +1041,32 @@ main(int argc, char *argv[]) {
 	resultFP = stdout;
 	nodeIDOffset = startLine;
 	fprintf(resultFP, "DB Gerating starts from : \n");
-	printDepNodesWithTabs(resultFP, endNode, 0);
 
 	opDNode = endNode;
 	while (opDNode != startNode) {
 	  printDepNodesWithTabs(resultFP, opDNode, 0);
-	  findDepDListNodesReverse(&pattern_graph, opDNode);
+	  findDepDListNodesReverse(&(pn->pattern_data->pg), opDNode);
 	  opDNode = opDNode->left;
 	}
 
 	SETVAN(
-	  &pattern_graph, 
+	  &(pn->pattern_data->pg), 
 	  "Line",
 	  GET_NODE_ID_FROM_LINENO(GET_LINE_NO(startNode), nodeIDOffset), 
 	  (unsigned long) GET_LINE(startNode)
 	);
 
-	igraph_simplify(&pattern_graph, true, true, /*edge_comb=*/ NULL);
+	igraph_simplify(&(pn->pattern_data->pg), true, true, /*edge_comb=*/ NULL);
+
+	igraph_graph_list_init(&complist, 0);
+	igraph_decompose(&(pn->pattern_data->pg), &complist, IGRAPH_WEAK, -1, 2);
+	pn->pattern_data->complist = complist;
+
+	for (i = 0; i < igraph_graph_list_size(&(pn->pattern_data->complist)); i++) {
+		igraph_t *component;
+        component = igraph_graph_list_get_ptr(&(pn->pattern_data->complist), i);
+        igraph_write_graph_dot(component, stdout);
+    }
 
 	/*
 	 * Output files
@@ -1038,17 +1084,19 @@ main(int argc, char *argv[]) {
 	  return FILE_OPEN_ERR;
 	}
 
-	igraph_write_graph_dot(&pattern_graph, pattern_dot_fp);
-	igraph_write_graph_lgl(&pattern_graph, pattern_lgl_fp, NULL, NULL, /*isolates*/ 0);
+	igraph_write_graph_dot(&(pn->pattern_data->pg), pattern_dot_fp);
+	igraph_write_graph_lgl(&(pn->pattern_data->pg), pattern_lgl_fp, NULL, NULL, /*isolates*/ 0);
 
 	fprintf(resultFP, "\n#########################\n");
 	fprintf(resultFP, "\tfun: %s\n", pn->pattern_data->fun);
 	fprintf(resultFP, "\tstart_pc: %lx\n", pn->pattern_data->start_pc);
 	fprintf(resultFP, "\tend_pc: %lx\n", pn->pattern_data->end_pc);
+	fprintf(resultFP, "\tstart_line: %ld\n", pn->pattern_data->start_lineno);
+	fprintf(resultFP, "\tend_line: %ld\n", pn->pattern_data->end_lineno);
 
 	fclose(pattern_dot_fp);
 	fclose(pattern_lgl_fp);
-	igraph_destroy(&pattern_graph);
+	// igraph_destroy(&pattern_graph);
   }
   fprintf(stderr, "### Done generating PatternDB ...\n");
 
@@ -1079,10 +1127,18 @@ main(int argc, char *argv[]) {
 		startLine = (line_no_t) strtol(startValue, NULL, 10);
 		endLine = (line_no_t) strtol(endValue, NULL, 10);
 		rangeKind = RANGE_LINE_NO;
+		if (startLine >= endLine) {
+		  fprintf(stderr, "Range error: start line number < end line number\n");
+		  continue;
+		}
 	  } else if (answer == 'p') {
 		startPC = (pc_t) strtol(startValue, NULL, 16);
 		endPC = (pc_t) strtol(endValue, NULL, 16);
 		rangeKind = RANGE_PC;
+		if (startPC >= endPC) {
+		  fprintf(stderr, "Range error: start PC < end PC\n");
+		  continue;
+		}
 	  }
 	  
 	  noOfGraphNodes = 0;
@@ -1128,6 +1184,8 @@ main(int argc, char *argv[]) {
 		/* get next vertex */
 		IGRAPH_VIT_NEXT(vit);
 	  }
+	  igraph_vs_destroy(&vs);
+	  igraph_vit_destroy(&vit);
 
 	  printf(">>> Output file name (for monitor input stdout): ");
 	  scanf("%s", resultFileName);
@@ -1137,13 +1195,11 @@ main(int argc, char *argv[]) {
 		fprintf(stderr, "File open error\n");
 		return FILE_OPEN_ERR;
 	  }
-
 			  
 	  DBG1_PRINT("sizeof(operandNameStrs) = %ld\n", sizeof(operandNameStrs));
 	  DBG1_PRINT("sizeof(operandNameStrs)/sizeof(char *) = %ld\n", sizeof(operandNameStrs)/sizeof(char *));
 
 	  fprintf(resultFP, "Starting from : \n");
-	  printDepNodesWithTabs(resultFP, endNode, 0);
 
 	  opDNode = endNode;
 	  while (opDNode != startNode) {
@@ -1158,7 +1214,10 @@ main(int argc, char *argv[]) {
 		GET_NODE_ID_FROM_LINENO(GET_LINE_NO(startNode), nodeIDOffset), 
 		(unsigned long) GET_LINE(startNode)
 	  );
+	  
+	  igraph_simplify(&log_graph, true, true, /*edge_comb=*/ NULL);
 
+	  if (resultFP != stdout) fclose(resultFP);
 	  {
 		/* open a dot file */
 		char dotFileName[LOG_FILENAME_SIZE+5];
@@ -1183,9 +1242,6 @@ main(int argc, char *argv[]) {
 	  }
 
 
-	  if (resultFP != stdout) fclose(resultFP);
-	  igraph_simplify(&log_graph, true, true, /*edge_comb=*/ NULL);
-
 	  {
 		igraph_bool_t res;
 
@@ -1202,8 +1258,114 @@ main(int argc, char *argv[]) {
 
 	  igraph_write_graph_lgl(&log_graph, fpLgl, NULL, NULL, /*isolates*/ 1);
 	  igraph_write_graph_dot(&log_graph, fpDot);
-	  igraph_destroy(&log_graph);
+	  fclose(fpLgl);
+	  fclose(fpDot);
+
+	  igraph_graph_list_init(&log_complist, 0);
+	  igraph_decompose(&log_graph, &log_complist, IGRAPH_WEAK, -1, 2);
+
+	  /* for each log component find isomorphic from pattern */
+	  for (i = 0; i < igraph_graph_list_size(&log_complist); i++) {
+		FILE *fp_log;
+		char fp_log_name[30];
+		igraph_t *log_component;
+
+		sprintf(fp_log_name, "log%ld.dot", i);
+		fp_log = fopen(fp_log_name, "w");
+
+        log_component = igraph_graph_list_get_ptr(&log_complist, i);
+        igraph_write_graph_dot(log_component, fp_log);
+		fclose(fp_log);
+
+		for (pn = pattern_head; pn ; pn = pn->link) {
+		  igraph_graph_list_t pattern_compilst;
+
+		  printf("######################################\n");
+
+		  pattern_complist = pn->pattern_data->complist;
+		  for (j = 0; j < igraph_graph_list_size(&(pattern_complist)); j++) {
+			igraph_t *pattern_component;
+			igraph_vector_int_t vmap12, vmap21;
+			igraph_integer_t sub_iso_count = 0;
+			igraph_bool_t iso;
+			igraph_vector_int_t map;
+			igraph_vector_int_list_t maps, vmaps;
+			char pattern_comp_name[30];
+			FILE *fp_pattern_comp;
+
+			igraph_vector_int_init(&map, 0);
+			igraph_vector_int_list_init(&maps, 0);
+			igraph_vector_int_init(&vmap12, 0);
+			igraph_vector_int_init(&vmap21, 0);
+			igraph_vector_int_list_init(&vmaps, 0);
+
+			pattern_component = igraph_graph_list_get_ptr(&(pattern_complist), j);
+
+			sprintf(pattern_comp_name, "pt_%s_%ld.dot", pn->pattern_data->fun, j);
+			fp_pattern_comp = fopen(pattern_comp_name, "w");
+			igraph_write_graph_dot(pattern_component, fp_pattern_comp);
+			fclose(fp_pattern_comp);
+
+			printf("  >>>> log: %ld, pattern: %s(%ld)\n", i, pn->pattern_data->fun, j);
+
+			if (igraph_vcount(log_component) < igraph_vcount(pattern_component))
+			  continue;
+
+#if 1
+			igraph_count_subisomorphisms_vf2(
+			  /* graph1= */ log_component,
+			  /* graph2= */ pattern_component,
+			  /* vertex_color1= */ NULL,
+			  /* vertex_color1= */ NULL,
+			  /* edge_color1= */ NULL,
+			  /* edge_color1= */ NULL,
+			  /* count= */ &sub_iso_count,
+			  /* node_compat_fn= */ is_equal_node,
+			  /* edge_compat_fn= */ NULL,
+			  /* arg= */ 0);
+			printf("  >>>> No. of subisomorphic graph = %ld)-----\n", sub_iso_count);
+
+			igraph_subisomorphic_vf2(
+			  /* graph1= */ log_component,
+			  /* graph2= */ pattern_component,
+			  /* vertex_color1= */ NULL,
+			  /* vertex_color1= */ NULL,
+			  /* edge_color1= */ NULL,
+			  /* edge_color1= */ NULL,
+			  /* iso= */ &iso,
+			  /* map12= */ &vmap12,
+			  /* map21= */ &vmap21,
+			  /* node_compat_fn= */ is_equal_node,
+			  /* edge_compat_fn= */ NULL,
+			  /* arg= */ 0);
+
+			if (iso) {
+			  printf("  >>>>  map 1 (log_graph, larger graph) ==> 2(pattern_g, smaller graph)\n");
+			  print_map(&vmap12);
+			  printf("  >>>>  map 2 (pattern_g, smaller graph) ==> 1(log_graph, larger graph)\n");
+			  print_map(&vmap21);
+			  printf("  >>>>  all mappings \n");
+			  print_maps(&vmap21, &vmaps);
+			  printf("  >>>>  map 1 (log_graph, larger graph) ==> 2(pattern_g, smaller graph)\n");
+			  print_map(&vmap12);
+			  printf("  >>>>  map 2 (pattern_g, smaller graph) ==> 1(log_graph, larger graph)\n");
+			  print_map(&vmap21);
+			}
+#else
+			igraph_subisomorphic_lad(pattern_component, log_component, NULL, &iso, &map, &maps, 
+				  /*induced=*/ true, /*time_limit=*/ 0);
+			printf("\n\n----- lad (domain, not induced) -----\n");
+			print_maps(&map, &maps);
+#endif
+			igraph_vector_int_destroy(&map);
+			igraph_vector_int_list_destroy(&maps);
+		  }
+		}
+
+	  }
 	}
+
+	igraph_destroy(&log_graph);
 
 #if 0
 	{

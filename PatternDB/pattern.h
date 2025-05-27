@@ -12,6 +12,9 @@ typedef struct pattern_t {
   
   unsigned long start_lineno;
   unsigned long end_lineno;
+
+  igraph_t pg;
+  igraph_graph_list_t complist;
 } PATTERN;
 
 typedef struct pattern_node_t {

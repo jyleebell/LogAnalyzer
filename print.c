@@ -61,7 +61,6 @@ printLogLine(FILE *fp, LogLine *lineP, int isPrintOperation) {
   fprintf(fp, "#\t@\tFIELDB: %x\n", lineP->fieldB);
   fprintf(fp, "#\t@\tOP_NAME: %s\n", lineP->opName);
   fprintf(fp, "#\t@\tSTR_LINE: %s", lineP->strLine);
-  fprintf(fp, "#\t@\tIS VISITED: %d", lineP->isVisited);
   if (isPrintOperation)
 	printOperation(fp, lineP->opP);
   fprintf(fp, "#\t@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");

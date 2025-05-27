@@ -18,6 +18,8 @@ print_pattern_list() {
 	printf("\tfun: %s\n", pn->pattern_data->fun);
 	printf("\tstart_pc: %lx\n", pn->pattern_data->start_pc);
 	printf("\tend_pc: %lx\n", pn->pattern_data->end_pc);
+	printf("\tstart_line: %ld\n", pn->pattern_data->start_lineno);
+	printf("\tend_line: %ld\n", pn->pattern_data->end_lineno);
   }
 }
 
