@@ -11,5 +11,6 @@ igraph_bool_t is_equal_node (
   const igraph_integer_t pattern_node,
   void *arg);
 
+void print_iso(igraph_t *log_g, igraph_vector_int_t map, char *fun);
 
 

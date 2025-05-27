@@ -19,6 +19,8 @@ void printLogLine(FILE *fp, LogLine *lineP, int printOperation);
 
 void printOpDListNode(FILE *fp, OpDListNode *opNode);
 void printDepNodes(FILE *fp, OpDListNode *n, int kind);
+void printMatchLogLine(FILE *fp, LogLine *lineP, int isPrintOperation);
+
 
 void printDepNodesWithTabs(FILE *fp, OpDListNode *n, unsigned long tabs);
 #endif

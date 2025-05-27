@@ -66,6 +66,12 @@ printLogLine(FILE *fp, LogLine *lineP, int isPrintOperation) {
   fprintf(fp, "#\t@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
 }
 
+
+void
+printMatchLogLine(FILE *fp, LogLine *lineP, int isPrintOperation) {
+  fprintf(fp, "%ld: %s\n", lineP->lineNo, lineP->strLine);
+}
+
 void
 printOpDListNode(FILE *fp, OpDListNode *node) {
   printLogLine(fp, node->lineP, 0);

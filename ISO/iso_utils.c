@@ -109,3 +109,23 @@ igraph_bool_t is_equal_node (
   return false;
 }
 
+
+void
+print_iso(igraph_t *log_g, igraph_vector_int_t map, char *fun) {
+  igraph_integer_t size, i, vid;
+  unsigned long temp;
+  LogLine *log_lineP;
+  OPERATOR log_op, pattern_op;
+
+  size = igraph_vector_int_size(&map);
+
+  printf("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
+  printf("%s matches to : \n", fun);
+  for (i = 0; i < size; i++) {
+	vid = VECTOR(map)[i];
+	temp = (unsigned long) VAN(log_g, "Line", vid);
+	log_lineP = (LogLine *) temp;
+	if (log_lineP) printMatchLogLine(stdout, log_lineP, 1);
+  }
+  printf("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n");
+}
