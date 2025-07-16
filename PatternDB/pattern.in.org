@@ -1,0 +1,44 @@
+fun: rshift_4B
+start_pc: 69e6
+end_pc: 69ee
+
+fun: lshift_4B
+start_pc: edef
+end_pc: edf4
+
+fun: add_2B
+start_pc: 3b00
+end_pc: 3b01
+
+fun: add_4B
+start_pc: 3be4
+end_pc: 3be9
+
+fun: mul_2B
+start_pc: ea80
+end_pc: eaa5
+
+fun: div_2B
+start_pc: ec07
+end_pc: ec19
+
+fun: div_4B
+start_pc: ec99
+end_pc: ecd5
+
+fun: mul_4B
+start_pc: eb20
+end_pc: ebb9
+
+fun: sqrt
+start_pc: cca8
+end_pc: cd67
+
+fun: exp
+start_pc: 6878
+end_pc: 68b5
+
+
+
+
+

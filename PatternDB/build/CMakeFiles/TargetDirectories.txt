@@ -1,0 +1,3 @@
+/DATADRIVE1/Projects/BatteryGauge/LogAnayzer/PatternDB/build/CMakeFiles/rebuild_cache.dir
+/DATADRIVE1/Projects/BatteryGauge/LogAnayzer/PatternDB/build/CMakeFiles/edit_cache.dir
+/DATADRIVE1/Projects/BatteryGauge/LogAnayzer/PatternDB/build/CMakeFiles/test_pattern_gen.dir

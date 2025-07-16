@@ -1,0 +1,9 @@
+#!/bin/bash
+
+echo "###### remove previous results ..."
+rm -rf *.dot *.lgl *.re
+
+echo "###### Run log Analyzer ..."
+./logAnalyzer
+
+

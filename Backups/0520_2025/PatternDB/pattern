@@ -1,0 +1,14 @@
+fun: rshift_4B
+start_pc: 69e6
+end_pc: 69ee
+
+fun: lshift_4B
+start_pc: edef
+end_pc: edf4
+
+fun: mul_2B
+start_pc: EA80
+end_pc: EAA5
+
+
+

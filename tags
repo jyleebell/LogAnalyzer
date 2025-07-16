@@ -1,0 +1,58 @@
+DBG1_PRINT	util.h	/^#define DBG1_PRINT(fmt, args...) fprintf(stderr, f/
+DBG2_PRINT	util.h	/^#define DBG2_PRINT(fmt, args...) fprintf(stderr, f/
+GET_DEST_OPERAND	codeGen.h	/^#define GET_DEST_OPERAND(nodeP) nodeP->lineP->opP-/
+GET_LINE	codeGen.h	/^#define GET_LINE(nodeP) nodeP->lineP$/
+GET_LINE_NO	codeGen.h	/^#define GET_LINE_NO(nodeP) nodeP->lineP->lineNo$/
+GET_LINE_STR	codeGen.h	/^#define GET_LINE_STR(nodeP) nodeP->lineP->strLine$/
+GET_SRC0_OPERAND	codeGen.h	/^#define GET_SRC0_OPERAND(nodeP) nodeP->lineP->opP-/
+GET_SRC0_OPERAND_TYPE	codeGen.h	/^#define GET_SRC0_OPERAND_TYPE(nodeP) nodeP->lineP-/
+GET_SRC1_OPERAND	codeGen.h	/^#define GET_SRC1_OPERAND(nodeP) nodeP->lineP->opP-/
+GrpHeadNode	opList.h	/^} GrpHeadNode;$/
+IS_VISITED	codeGen.h	/^#define IS_VISITED(nodeP) nodeP->lineP->isVisited$/
+LogLine	codeGen.h	/^} LogLine;$/
+MlogAnalyzer	logAnalyzer.c	/^main(int argc, char *argv[]) {$/
+OPERAND	codeGen.h	/^} OPERAND;$/
+OPERAND_TYPE	codeGen.h	/^} OPERAND_TYPE;$/
+OPERATION	codeGen.h	/^} OPERATION;$/
+OPERATOR	codeGen.h	/^} OPERATOR;$/
+OpDListNode	opList.h	/^} OpDListNode;$/
+RANGE_VAR	codeGen.h	/^} RANGE_VAR;$/
+addr_t	codeGen.h	/^typedef long addr_t;$/
+byte_t	codeGen.h	/^typedef unsigned char byte_t;$/
+clk_t	codeGen.h	/^typedef unsigned long clk_t;$/
+createNode	opList.c	/^createNode(LogLine *lineP) {$/
+deleteAfter	opList.c	/^deleteAfter(OpDListNode *at) {$/
+deleteBefore	opList.c	/^deleteBefore(OpDListNode *at) {$/
+deleteFirst	opList.c	/^OpDListNode * deleteFirst(void) {$/
+deleteNode	opList.c	/^deleteNode(OpDListNode *node) {$/
+findDepDListNodes	logAnalyzer.c	/^findDepDListNodes(OpDListNode *nodeP) {$/
+findRange	logAnalyzer.c	/^findRange(int rangeKind, unsigned long start, unsi/
+getClk	logAnalyzer.c	/^getClk(char *lineStr, clk_t *clkP) {$/
+getFieldA	logAnalyzer.c	/^getFieldA(char *lineStr, byte_t *fieldP) {$/
+getFieldB	logAnalyzer.c	/^getFieldB(char *lineStr, byte_t *fieldP) {$/
+getOpName	logAnalyzer.c	/^getOpName(char *lineStr, char *opName) {$/
+getOperandsStr	logAnalyzer.c	/^getOperandsStr (char *lineStr, char **srcOperandsS/
+getPC	logAnalyzer.c	/^getPC(char *lineStr, pc_t *pcP) {$/
+initOpDList	opList.c	/^initOpDList (void)$/
+insertFirst	opList.c	/^insertFirst(LogLine *lineP) {$/
+insertLast	opList.c	/^insertLast(LogLine *lineP) {$/
+insertLineNo	logAnalyzer.c	/^insertLineNo(unsigned long lineNo, GrpHeadNode *h,/
+instertAfter	opList.c	/^instertAfter(OpDListNode *at, LogLine *lineP) {$/
+instertBefore	opList.c	/^instertBefore(OpDListNode *at, LogLine *lineP) {$/
+isEqualOperand	logAnalyzer.c	/^isEqualOperand(OPERAND *opnd0, OPERAND *opnd1) {$/
+isEqualOperation	logAnalyzer.c	/^isEqualOperation(OPERATION *op0, OPERATION *op1) {/
+isLineNoInList	logAnalyzer.c	/^isLineNoInList(unsigned long lineNo, GrpHeadNode */
+line_no_t	codeGen.h	/^typedef unsigned long line_no_t;$/
+parseOperand	logAnalyzer.c	/^parseOperand(char *lineStr, OPERAND *opP) {$/
+pc_t	codeGen.h	/^typedef unsigned long pc_t;$/
+printDepNodes	print.c	/^printDepNodes(FILE *fp, OpDListNode *n, int kind) /
+printDepNodesWithTabs	print.c	/^printDepNodesWithTabs(FILE *fp, OpDListNode *n, un/
+printLogLine	print.c	/^printLogLine(FILE *fp, LogLine *lineP, int isPrint/
+printOpDListNode	print.c	/^printOpDListNode(FILE *fp, OpDListNode *node) {$/
+printOperand	print.c	/^printOperand(FILE *fp, int kind, OPERAND *opP, int/
+printOperation	print.c	/^printOperation(FILE* fp, OPERATION *operP) {$/
+printUsage	logAnalyzer.c	/^printUsage(char *progName) {$/
+readLine	logAnalyzer.c	/^readLine(FILE *fp, char *lineStr, size_t size) {$/
+skipWhiteSpaces	logAnalyzer.c	/^skipWhiteSpaces(char *lineStr) {$/
+splitSrcOpStr	logAnalyzer.c	/^splitSrcOpStr(char *srcOperandsStr, char *srcOP1St/
+value_t	codeGen.h	/^typedef unsigned long value_t;$/

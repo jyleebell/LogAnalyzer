@@ -1,0 +1,46 @@
+1. Pattern DB generation
+   A set for LGL files
+   An LGL file is generated for each pattern.
+
+2. Read the log file and construct a double-linked list where each node represents a log line
+
+3. make target graphs and find isomorphism 
+
+  line_number = 1
+  while line_number <= total_no_of_lines 
+	target_graph = make_target_graph(line_nmber, line_number + MAX_TARGET_SIZE)
+	for p in pattern DB /* from large to small */
+	  inst = find_subisomorphism(target, p)
+	  if (inst) 
+		line_number += size(inst)
+	  else
+		line_number++
+	end /* for */
+  end /* while */
+
+
+
+1. Pattern DB generation
+- input file format
+  fun: 
+  start_pc: 
+  end_pc: 
+
+  start_lineno: 
+  end_lineno:
+
+typedef struct pattern_t {
+  char fun[20];
+  unsigned long start_pc;
+  unsigned long end_pc;
+
+  unsigned long start_lineno;
+  unsigned long end_lineno;
+} PATTERN;
+
+typdef struct pattern_node_t {
+  PATTERN data;
+  struct pattern_node_t *link;
+} PATTERN_NODE;
+
+

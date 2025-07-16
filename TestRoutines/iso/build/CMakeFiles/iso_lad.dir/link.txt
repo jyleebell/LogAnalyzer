@@ -1,0 +1,1 @@
+/usr/bin/c++ CMakeFiles/iso_lad.dir/igraph_subisomorphic_lad.c.o CMakeFiles/iso_lad.dir/DATADRIVE1/Projects/BatteryGauge/LogAnayzer/GraphPrinter/graphPrinter.c.o -o iso_lad  /DATADRIVE1/Projects/BatteryGauge/igraph/lib/libigraph.a -lm /usr/lib/x86_64-linux-gnu/libgmp.so /usr/lib/gcc/x86_64-linux-gnu/7/libgomp.so -lpthread 

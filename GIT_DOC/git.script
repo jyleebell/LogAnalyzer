@@ -1,0 +1,237 @@
+
+##################################################
+# A REPOSITORY, or Git project, encompasses the entire collection of files and folders associated with a project, 
+# along with each file's revision history. 
+# The file history appears as snapshots in time called commits. 
+# The commits can be organized into multiple lines of development called branches. 
+##################################################
+
+# In Repo. directory
+# GIT INIT initializes a brand new Git repository and begins tracking an existing directory. 
+# It adds a hidden subfolder within the existing directory that houses the internal 
+# data structure required for version control.
+git init
+
+# GIT CLONE creates a local copy of a project that already exists remotely. 
+# The clone includes all the project's files, history, and branches.
+
+# GIT ADD stages a change. Git tracks changes to a developer's codebase, 
+# but it's necessary to stage and take a snapshot of the changes to include them in the project's history. 
+# This command performs staging, the first part of that two-step process. 
+# Any changes that are staged will become a part of the next snapshot and a part of the project's history. 
+# Staging and committing separately gives developers complete control over the history of their project 
+# without changing how they code and work.
+git add README.md
+
+
+# GIT COMMIT saves the snapshot to the project history and completes the change-tracking process. 
+# In short, a commit functions like taking a photo. Anything that's been staged with git add 
+# will become a part of the snapshot with git commit.
+git commit -m "first commit"
+
+# GIT BRANCH shows the branches being worked on locally.
+# git branch my-branch: create a new branch to store any new changes
+git branch -M main
+
+# GIT PULL updates the local line of development with updates from its remote counterpart. 
+# Developers use this command if a teammate has made commits to a branch on a remote, 
+# and they would like to reflect those changes in their local environment.
+# git pull is a convenient shortcut for completing both git fetch and git mergein the same command
+# $ git pull REMOTE-NAME BRANCH-NAME
+# Grabs online updates and merges them with your local work
+# Because pull performs a merge on the retrieved changes, you should ensure 
+# that your local work is committed before running the pull command. 
+# If you run into a merge conflict you cannot resolve, or if you decide to quit the merge, you can use 
+# GIT MERGE --ABORT to take the branch back to where it was in before you pulled.
+
+# GIT CHECKOUT <branch>: To prepare for working on <branch>, switch to it by updating the index and the files 
+# in the working tree, and by pointing HEAD at the branch. 
+# Local modifications to the files in the working tree are kept, so that they can be committed to the <branch>.
+
+
+
+#********************************
+# A remote URL is Git's fancy way of saying "the place where your code is stored." 
+# That URL could be your repository on GitHub, or another user's fork, or even on a completely different server.
+#********************************
+####
+# GIT REMOTE ADD provide the path for the repository you created on github.
+# In other words, matches a remote URL with a name:git remote add origin <REMOTE_URL>(associates the name origin with the REMOTE_URL)
+
+# To add a new remote, use the GIT REMOTE ADD command on the terminal, in the directory your repository is stored at.
+# The git remote add command takes two arguments:
+#    A remote name, for example, origin
+#    A remote URL, for example, https://github.com/OWNER/REPOSITORY.git
+git remote add origin git@github.com:jyleebell/GitTest.git
+
+####
+# GIT REMOTE SET-URL changes an existing remote repository URL
+
+####
+# GIT REMOTE RENAME renames an existing remote.
+
+####
+# GIT REMOTE RM removes a remote URL from your repository.
+
+# GIT PUSH updates the remote repository with any commits made locally to a branch.
+# origin : remote (upstream)
+# main: local
+git push -u origin main
+
+
+# GIT CLONE grabs a complete copy of another user's repository.
+# git clone https://github.com/USERNAME/REPOSITORY.git
+# When you run git clone, the following actions occur:
+#     A new folder called repo is made
+#     It is initialized as a Git repository
+#     A remote named ORIGIN is created, pointing to the URL you cloned from
+#     All of the repository's files and commits are downloaded there
+#     The default branch is checked out
+# For every branch foo in the remote repository, a corresponding remote-tracking branch 
+# refs/remotes/origin/foo is created in your local repository. 
+# You can usually abbreviate such remote-tracking branch names to origin/foo.
+
+# GIT FETCH  retrieve new work done by other people. 
+# Fetching from a repository grabs all the new remote-tracking branches and tags 
+# WITHOUT merging those changes into your own branches.
+# If you already have a local repository with a remote URL set up for the desired project, 
+# you can grab all the new information by using git fetch *remotename* in the terminal:
+# git fetch REMOTE-NAME fetches updates made to a remote repository
+
+# GIT MERGE: git merge merges lines of development together. 
+# This command is typically used to combine changes made on two distinct branches. 
+# For example, a developer would merge when they want to combine changes from a feature branch 
+# into the main branch for deployment.
+# Typically, you'd merge a remote-tracking branch (i.e., a branch fetched from a remote repository) 
+# with your local branch:
+# $ git merge REMOTE-NAME/BRANCH-NAME
+# Merges updates made online with your local work
+
+# GIT STATUS: git status shows the status of changes as untracked, modified, or staged.
+
+# GIT RM <filename>
+# git commit
+# git push -u origin main
+
+
+
+
+#########################################################################################
+#### Some Examples
+
+
+
+#########################################################################################
+#### Some Examples
+1. Contribute to and existing repository
+  # download a repository on GitHub to our machine
+  # Replace `owner/repo` with the owner and name of the repository to clone
+  # - Clones a repository into a newly created directory, 
+  # - creates remote-tracking branches for each branch in the cloned repository (visible using git branch -r), 
+  # - and creates and checks out an initial branch that is forked from the cloned repository’s currently active branch.
+  git clone git@github.com:jyleebell/repo.git
+
+  # change into the `repo` directory
+  cd repo
+
+  # create a new branch to store any new changes
+  git branch my-branch
+
+  # switch to that branch (line of development)
+  git checkout my-branch
+
+  # make changes, for example, edit `file1.md` and `file2.md` using the text editor
+
+  # stage the changed files
+  git add file1.md file2.md
+
+  # take a snapshot of the staging area (anything that's been added)
+  git commit -m "my snapshot"
+
+  # push changes to github
+  git push --set-upstream origin my-branch
+
+
+2. Contribute to an existing branch on GitHub
+This example assumes that you already have a project called repo on the machine and 
+that a new branch has been pushed to GitHub since the last time changes were made locally.
+
+  # change into the `repo` directory
+  cd repo
+
+  # update all remote tracking branches, and the currently checked out branch
+  git pull
+
+  # change into the existing branch called `feature-a`
+  git checkout feature-a
+
+  # make changes, for example, edit `file1.md` using the text editor
+
+  # stage the changed file
+  git add file1.md
+
+  # take a snapshot of the staging area
+  git commit -m "edit file1"
+
+  # push changes to github
+  git push
+
+3. Start a new repository and publish it to GitHub
+First, you will need to create a new repository on GitHub. 
+Do not initialize the repository with a README, .gitignore or License file. 
+This empty repository will await your code.
+
+  # create a new directory, and initialize it with git-specific functions
+  git init my-repo
+
+  # change into the `my-repo` directory
+  cd my-repo
+
+  # create the first file in the project
+  touch README.md
+
+  # git isn't aware of the file, stage it
+  git add README.md
+
+  # take a snapshot of the staging area
+  git commit -m "add README to initial commit"
+
+  # provide the path for the repository you created on github
+  git remote add origin https://github.com/YOUR-USERNAME/YOUR-REPOSITORY-NAME.git
+
+  # push changes to github
+  git push --set-upstream origin main
+
+
+4. Contribute to other people's project
+  # jyleebell : the origial owner of GitTest
+  # jong4140 : collaborator
+  # In jyleebell/GitTest.git, register jong4140 as a collaborators (Settings -> Access/Collaborators)
+  # Add people -> Search a user
+  # An invitation e-mail is sent to a user and in the e-mail click Accept
+  # Now jong4140 can access the repository.
+  
+  # clone a repository
+  git clone git@github.com:jyleebell/GitTest.git
+
+  # change into GitTest
+  cd GitTest
+
+  # switch to FirstBranch : default branch is main 
+  git checkout FirstBranch
+
+  # Add new files, a.c and b.c
+
+  # stage the added files
+  git add a.c b.c
+
+  # take a snapshot of the staging area
+  git commit -m "a.c & b.c are added."
+
+  # push changes to github
+  git push 
+
+
+
+
+

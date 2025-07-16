@@ -1,0 +1,1 @@
+/usr/bin/cc CMakeFiles/logAnalyzer.dir/logAnalyzer.c.o CMakeFiles/logAnalyzer.dir/opList.c.o CMakeFiles/logAnalyzer.dir/print.c.o CMakeFiles/logAnalyzer.dir/util.c.o CMakeFiles/logAnalyzer.dir/PatternDB/pattern_gen.c.o -o logAnalyzer 

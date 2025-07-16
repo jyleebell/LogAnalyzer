@@ -1,0 +1,4 @@
+/DATADRIVE1/Projects/BatteryGauge/LogAnayzer/TestRoutines/IO/build/CMakeFiles/rebuild_cache.dir
+/DATADRIVE1/Projects/BatteryGauge/LogAnayzer/TestRoutines/IO/build/CMakeFiles/edit_cache.dir
+/DATADRIVE1/Projects/BatteryGauge/LogAnayzer/TestRoutines/IO/build/CMakeFiles/write_lgl.dir
+/DATADRIVE1/Projects/BatteryGauge/LogAnayzer/TestRoutines/IO/build/CMakeFiles/read_lgl.dir

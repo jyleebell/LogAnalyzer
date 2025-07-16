@@ -1,0 +1,4 @@
+/DATADRIVE1/Projects/BatteryGauge/LogAnayzer/TestRoutines/iso/build/CMakeFiles/rebuild_cache.dir
+/DATADRIVE1/Projects/BatteryGauge/LogAnayzer/TestRoutines/iso/build/CMakeFiles/iso_lad.dir
+/DATADRIVE1/Projects/BatteryGauge/LogAnayzer/TestRoutines/iso/build/CMakeFiles/edit_cache.dir
+/DATADRIVE1/Projects/BatteryGauge/LogAnayzer/TestRoutines/iso/build/CMakeFiles/iso.dir

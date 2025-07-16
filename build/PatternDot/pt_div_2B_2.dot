@@ -1,0 +1,18 @@
+/* Created by igraph 0.10.15 */
+digraph {
+  0 [
+    Visited=1
+    Line=94387332134448
+  ];
+  1 [
+    Visited=1
+    Line=94387332134800
+  ];
+  2 [
+    Visited=1
+    Line=94387332135200
+  ];
+
+  0 -> 1;
+  0 -> 2;
+}

@@ -1,0 +1,36 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../PatternDB/pattern.h
+
+/DATADRIVE1/Projects/BatteryGauge/LogAnayzer/codeGen.h
+stdio.h
+-
+stdlib.h
+-
+string.h
+-
+
+/DATADRIVE1/Projects/BatteryGauge/LogAnayzer/opList.c
+stdio.h
+-
+stdlib.h
+-
+codeGen.h
+/DATADRIVE1/Projects/BatteryGauge/LogAnayzer/codeGen.h
+opList.h
+/DATADRIVE1/Projects/BatteryGauge/LogAnayzer/opList.h
+
+/DATADRIVE1/Projects/BatteryGauge/LogAnayzer/opList.h
+stdio.h
+-
+codeGen.h
+/DATADRIVE1/Projects/BatteryGauge/LogAnayzer/codeGen.h
+pattern.h
+/DATADRIVE1/Projects/BatteryGauge/LogAnayzer/pattern.h
+
