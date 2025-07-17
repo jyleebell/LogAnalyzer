@@ -3,6 +3,7 @@
 
 #include "codeGen.h"
 #include "opList.h"
+#include "find_dep.h"
 
 OpDListNode *OpDListHead = NULL;
 OpDListNode *OpDListLast = NULL;
@@ -213,6 +214,10 @@ make_summary_node(OpDListNode *startDLNode, OpDListNode *endDLNode, PATTERN_NODE
 
   unsigned long startLineNo = GET_LINE_NO(startDLNode);
   unsigned long endLineNo = GET_LINE_NO(endDLNode);
+  unsigned long clk0, clk1;
+
+  DEP *dep_list[MAX_ARGS], *dep;
+
 
   summaryNode = (OpDListNode *) malloc(sizeof(OpDListNode));
   summaryNode->lineP = (LogLine *) malloc(sizeof(LogLine));
@@ -221,12 +226,26 @@ make_summary_node(OpDListNode *startDLNode, OpDListNode *endDLNode, PATTERN_NODE
 
   for (int i = 0; i < MAX_ARGS; i++) {
 	  int offset = GET_PATTERN_OFFSET0(pn, i);
+	  OPERAND *arg0, *arg1;
 	  n = startDLNode;
 	  for (int j = 0; j < offset; j++) {
 		n = n->right;
 	  }
+
+	  arg0 = GET_SRC0_OPERAND(n);
+	  arg1 = GET_SRC1_OPERAND(n);
+
+
+	  clk0 = findDepDListNodesReverse(startDLNode, arg0);
+
+	  dep = (DEP *) malloc(sizeof(DEP));
+	  dep->clock = clk0;
+	  dep->op = arg0;
+	  dep_list[i] = dep;
   }
 
+  print_dep_list(stdout, dep_list, MAX_ARGS, 1);
+ 
   SET_NODE_TYPE(summaryNode, 1);
 
   sprintf(summaryStr, "clk[%08lx]pc[%08lx] %s 0x%08lx = 0x%08lx %s 0x%08lx : (0x%08lx, 0x%08lx)\n", 

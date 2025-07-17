@@ -1,7 +1,7 @@
 fun: rshift_4B
 start_pc: 69e6
 end_pc: 69ee
-op0_offset: 8, 7, 2, 3
+op0_offset: 0, 1, 8, 15
 op1_offset: 4, 5, 6, 7
 
 fun: lshift_4B

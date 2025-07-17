@@ -15,6 +15,7 @@ Log Analyzer
 #include "print.h"
 #include "opList.h"
 #include "pattern.h"
+#include "find_dep.h"
 
 #define DEBUG 0
 #define USER_INFO 1

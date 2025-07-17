@@ -24,6 +24,8 @@ add_executable(logAnalyzer
   print.h
   util.c
   util.h
+  find_dep.c
+  find_dep.h
   PatternDB/pattern.h
   PatternDB/pattern_gen.c
   #ISO/iso_utils.c

@@ -95,7 +95,8 @@ typedef enum operand_type_t {
   EEP2_M,
   LSB,
   MSB,
-  CONST
+  CONST,
+  NOP
 } OPERAND_TYPE;
 
 typedef enum operator {
@@ -178,7 +179,11 @@ extern unsigned long lineNo;
 #define SET_NODE_TYPE(nodeP, v) nodeP->lineP->nodeType = v
 #define SET_STR_LINE(nodeP, s) strcpy(nodeP->lineP->strLine, s) 
 
-#define GET_SRC0_OPERAND_TYPE(nodeP) nodeP->lineP->opP->src[0]->type
+#define GET_SRC0_OPERAND_TYPE(nodeP) (nodeP->lineP->opP->src ? nodeP->lineP->opP->src[0]->type : NOP)
+#define GET_SRC1_OPERAND_TYPE(nodeP) (nodeP->lineP->opP->src ? nodeP->lineP->opP->src[1]->type : NOP)
+
+#define GET_OPERAND_TYPE(op) (op->type)
+
 #define IS_VISITED(nodeP) nodeP->lineP->isVisited
 
 #define GET_NODE_ID_FROM_LINENO(lineNo, offset) (lineNo - offset)
