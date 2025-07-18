@@ -17,10 +17,6 @@ Log Analyzer
 #include "pattern.h"
 #include "find_dep.h"
 
-#define DEBUG 0
-#define USER_INFO 1
-
-
 char *operandNameStrs[] = {
   "GR0_L", 
   "GR0_H", 
@@ -936,13 +932,13 @@ main(int argc, char *argv[]) {
 	startPC = GET_PATTERN_START_PC(pn);
 	endPC = GET_PATTERN_END_PC(pn);
 
-	DBG_PRINT(USER_INFO, stdout, ">>>> %s: start = %lx,  end = %lx\n", GET_PATTERN_NAME(pn), GET_PATTERN_START_PC(pn), GET_PATTERN_END_PC(pn));
+	DBG_PRINT(DEBUG, stdout, ">>>> %s: start = %lx,  end = %lx\n", GET_PATTERN_NAME(pn), GET_PATTERN_START_PC(pn), GET_PATTERN_END_PC(pn));
 
 	for (OpDListNode *opNode = OpDListHead; opNode; opNode = opNode->right) {
 	  currentPC = GET_LINE_PC(opNode);
 
 	  if (currentPC == startPC) {
-		DBG_PRINT(USER_INFO, stdout, "\n>>>>>>> %s begins: %lx(Line NO. = %ld)\n", GET_PATTERN_NAME(pn), GET_LINE_PC(opNode), GET_LINE_NO(opNode));
+		DBG_PRINT(DEBUG, stdout, "\n>>>>>>> %s begins: %lx(Line NO. = %ld)\n", GET_PATTERN_NAME(pn), GET_LINE_PC(opNode), GET_LINE_NO(opNode));
 		startDLNode = opNode;
 
 		for (opNodeInPattern = opNode; ; opNodeInPattern = opNodeInPattern->right) {
@@ -963,7 +959,7 @@ main(int argc, char *argv[]) {
 		opNode = opNodeInPattern;
 		endDLNode = opNode->left;
 
-		DBG_PRINT(USER_INFO, stdout, ">>>>>>> end: %s(Line NO. = %ld)\n", GET_LINE_STR(endDLNode), GET_LINE_NO(endDLNode));
+		DBG_PRINT(DEBUG, stdout, ">>>>>>> end: %s(Line NO. = %ld)\n", GET_LINE_STR(endDLNode), GET_LINE_NO(endDLNode));
 
 
 		/*
@@ -997,7 +993,7 @@ main(int argc, char *argv[]) {
   for (OpDListNode *opNode = OpDListHead; opNode; ) {
 	// printOpDListNode(stdout, opNode, USER_INFO);
 	if (GET_LINE_NODE_TYPE(opNode))
-	  DBG_PRINT(USER_INFO, stdout, "Summary: %s", GET_LINE_STR(opNode));
+	  DBG_PRINT(USER_INFO, stdout, "%s", GET_LINE_STR(opNode));
 	else 
 	  DBG_PRINT(USER_INFO, stdout, "%s", GET_LINE_STR(opNode));
 	opNode = opNode->right;

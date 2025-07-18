@@ -8,6 +8,7 @@ print_dep_list(FILE *fp, DEP *l[], int size, int debug) {
   if (!debug) return;
 
   for (int i = 0; i < size; i++) {
+	if (!l[i]) continue;
 	fprintf(fp, ">>>>>>>: %lx\n", (l[i])->clock);
 	printOperand(fp, SRC0_OPERAND, (l[i])->op, debug);
   }

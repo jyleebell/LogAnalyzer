@@ -5,6 +5,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define DEBUG 0
+#define USER_INFO 1
+
+
 #define NO_ARGC 5
 #define MAX_LINE_LEN 100
 #define OPNAME_SIZE 20
@@ -183,6 +187,7 @@ extern unsigned long lineNo;
 #define GET_SRC1_OPERAND_TYPE(nodeP) (nodeP->lineP->opP->src ? nodeP->lineP->opP->src[1]->type : NOP)
 
 #define GET_OPERAND_TYPE(op) (op->type)
+#define GET_OPERAND_VALUE(op) (op->value)
 
 #define IS_VISITED(nodeP) nodeP->lineP->isVisited
 
